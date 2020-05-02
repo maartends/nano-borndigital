@@ -25,22 +25,55 @@ log = logging.getLogger('nano-bd')
 # Constants
 BASE_DOMAIN = 'viaa.be'
 
+def try_to_find_md5(object_metadata):
+    """Simple convenience function that allows to be able to try different
+    possible md5 field names (keys) and return it's value.
+
+    Args:
+        object_metadata (dict): The object metadata sub-section of the S3-event.
+
+    Returns:
+        str: The md5sum when found. An empty string ('') otherwise.
+    """
+    POSSIBLE_KEYS = ["x-md5sum-meta", "md5sum", "x-amz-meta-md5sum"]
+    for key in POSSIBLE_KEYS:
+        if key in object_metadata.keys():
+            log.debug(f"md5sum located in metadata-field: '{key}'")
+            return object_metadata[key]
+    return ""
+
 def get_from_event(event, name):
-    keys = ['bucket', 'object_key', 'host', 'tenant']
+    """An opionated function which knows where certain fields should be located
+    within the S3-event and can retrieve their values.
+    While dict-keys are case-sensitive, keys for JSON objects should probably
+    not be (hence `name.lower()`).
+
+    Args:
+        event (dict): The S3-event as a dict.
+        name (str): The field-name that we want the value for.
+
+    Returns:
+        str: The fields value.
+    """
+    keys = ['bucket', 'object_key', 'host', 'tenant', 'md5']
+    name = name.lower()
     assert name in keys, f'Unknown key: "{name}"'
+    s3_sub = event['Records'][0]['s3']
     if name == 'bucket':
-        return event['Records'][0]['s3']['bucket']['name']
+        return s3_sub['bucket']['name']
     elif name == 'object_key':
-        return event['Records'][0]['s3']['object']['key']
+        return s3_sub['object']['key']
     elif name == 'host':
         host = '.'.join([
-            event['Records'][0]['s3']['bucket']['name'],
-            event['Records'][0]['s3']['domain']['name'],
+            s3_sub['bucket']['name'],
+            s3_sub['domain']['name'],
             BASE_DOMAIN
         ])
         return host
     elif name =='tenant':
-        return event['Records'][0]['s3']['bucket']['metadata']['tenant']
+        return s3_sub['bucket']['metadata']['tenant']
+    elif name == 'md5':
+        return try_to_find_md5(s3_sub['object']['metadata'])
 
 
 class SidecarBuilder(object):

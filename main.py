@@ -91,12 +91,12 @@ def callback(ch, method, properties, body, ctx):
     sidecar_builder = SidecarBuilder(ctx)
     metadata_dict = {
         "Dynamic": {
-            "s3_object_key": event["records"][0]["s3"]["object"]["key"],
-            "s3_bucket": event["records"][0]["s3"]["bucket"]["name"],
+            "s3_object_key": get_from_event(event, 'object_key'),
+            "s3_bucket": get_from_event(event, 'bucket'),
             "PID": pid
         },
         "Technical": {
-            "Md5": event["records"][0]["s3"]["object"]["eTag"]
+            "Md5": get_from_event(event, 'md5')
         }
     }
 

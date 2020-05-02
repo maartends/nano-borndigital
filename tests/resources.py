@@ -51,7 +51,8 @@ S3_MOCK_EVENT = '''{
                "metadata":{
                   "Type": "application/mxf",
                   "Castor-System-Cid":"7da76343ad6bc9f2f739f0595a2756e4",
-                  "Content-Md5":"rbyRpD6YijtbdFuFKakLYQ=="
+                  "Content-Md5":"rbyRpD6YijtbdFuFKakLYQ==",
+                  "x-md5sum-meta": "7ef01fd710fec9a175d28c4a31dc49a2"
                }
             }
          }

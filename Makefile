@@ -35,7 +35,7 @@ lint:
 .PHONY: tests
 tests:
 	@echo "[TESTS]: Running unittests..."
-	pipenv run pytest tests
+	pipenv run pytest -v tests
 
 .PHONY: run
 run:
